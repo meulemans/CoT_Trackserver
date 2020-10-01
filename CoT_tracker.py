@@ -54,7 +54,7 @@ def PullDevices():
 		else:
 			remark_string = "Device Moving: false"
 		remark_string += "\nLast Comm: "+str(device["LastCommTime"])+"\nLast GPS Fix: "+str(device["LastGPSFix"])
-		evt.detail.remark = Event.Detail.Remark(remark_string)
+		#evt.detail.remark = Event.Detail.Remark(remark_string)
 		SendTakMessage(evt)
 		time.sleep(5)
 
