@@ -109,7 +109,6 @@ class EventTransmitter(Worker):  # pylint: disable=too-few-public-methods
                 _event = tx_event.generate_cot()
             else:
                 _event = tx_event
-            print(str(_event))
             self._logger.info("Sending event to server "+CoT_Tracker.DEFAULT_COT_IP+":"+str(CoT_Tracker.DEFAULT_COT_PORT))
             self.writer.write(_event)
             self._logger.info("Event send to server")
@@ -128,3 +127,5 @@ class EventReceiver(Worker):  # pylint: disable=too-few-public-methods
         self._logger.info('Running EventReceiver')
         while 1:
             rx_event = await self.event_queue.get()
+            self._logger.info("received data")
+            self._logger.info(rx_event)

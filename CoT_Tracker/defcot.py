@@ -29,61 +29,51 @@ class Event:
 
         @property
         def lat(self):
-            getcontext().prec = 8
-            return Decimal(self._lat) * 1
+            return Decimal(self._lat)
 
         @lat.setter
         def lat(self, value):
-            getcontext().prec = 8
             if 90 >= value >= -90:
-                self._lat = Decimal(value) * 1
+                self._lat = Decimal(value)
             else:
                 raise Exception(
                     "Latitude based on WGS-84 ellipsoid in signed degree-decimal format (e.g. -33.350000). Range -90 -> +90.")
 
         @property
         def lon(self):
-            getcontext().prec = 8
-            return Decimal(self._lon) * 1
+            return Decimal(self._lon)
 
         @lon.setter
         def lon(self, value):
             if 180 >= value >= -180:
-                getcontext().prec = 8
-                self._lon = Decimal(value) * 1
+                self._lon = Decimal(value)
             else:
                 raise Exception(
                     "Longitude based on WGS-84 ellipsoid in signed degree-decimal format (e.g. 44.383333). Range -180 -> +180.")
 
         @property
         def hae(self):
-            getcontext().prec = 3
-            return Decimal(self._hae) * 1
+            return Decimal(self._hae)
 
         @hae.setter
         def hae(self, value):
-            getcontext().prec = 3
-            self._hae = Decimal(value) * 1
+            self._hae = Decimal(value)
 
         @property
         def ce(self):
-            getcontext().prec = 3
-            return Decimal(self._ce) * 1
+            return Decimal(self._ce)
 
         @ce.setter
         def ce(self, value):
-            getcontext().prec = 3
-            self._ce = Decimal(value) * 1
+            self._ce = Decimal(value)
 
         @property
         def le(self):
-            getcontext().prec = 3
-            return Decimal(self._le) * 1
+            return Decimal(self._le)
 
         @le.setter
         def le(self, value):
-            getcontext().prec = 3
-            self._le = Decimal(value) * 1
+            self._le = Decimal(value)
 
     class Detail:
 
@@ -307,18 +297,14 @@ class Event:
                 return cot
 
         class Uid:
-            def __init__(self, version):
-                self.version = version
 
             @property
             def version(self):
-                getcontext().prec = 2
-                return Decimal(self._version) * 1
+                return Decimal(self._version)
 
             @version.setter
             def version(self, value):
-                getcontext().prec = 2
-                self._version = Decimal(value) * 1
+                self._version = Decimal(value)
 
             @property
             def attributes(self):
@@ -329,11 +315,15 @@ class Event:
                 self._attributes = value
 
             def generate_cot(self):
-                uid_attr = {
-                    "version": str(f"{self.version:.2f}")
-                }
+                uid_attr = {}
                 try:
-                    for key, value in self.attributes.item():
+                    uid_attr = {
+                        "version": str(f"{self.version:.1f}")
+                    }
+                except AttributeError:
+                    pass
+                try:
+                    for key, value in self.attributes.items():
                         uid_attr[key] = str(value)
                 except AttributeError:
                     pass
@@ -606,11 +596,11 @@ class Event:
     def generate_cot(self):
         evt_attr = {
             "version": str(f"{self.version:.1f}"),
+            "type": str(self.type),
             "uid": str(self.uid),
             "time": str(self.time),
             "start": str(self.start),
             "stale": str(self.stale),
-            "type": str(self.type),
             "how": str(self.how)
         }
         try:
