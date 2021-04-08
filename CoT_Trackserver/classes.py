@@ -7,7 +7,7 @@ import urllib.error
 
 import logging
 
-import CoT_Tracker
+import CoT_Trackserver
 
 
 class Worker:  # pylint: disable=too-few-public-methods
@@ -16,13 +16,13 @@ class Worker:  # pylint: disable=too-few-public-methods
 
     _logger = logging.getLogger(__name__)
     if not _logger.handlers:
-        _logger.setLevel(CoT_Tracker.constants.LOG_LEVEL)
+        _logger.setLevel(CoT_Trackserver.constants.LOG_LEVEL)
         _console_handler = logging.StreamHandler()
-        _console_handler.setLevel(CoT_Tracker.constants.LOG_LEVEL)
-        _console_handler.setFormatter(CoT_Tracker.constants.LOG_FORMAT)
+        _console_handler.setLevel(CoT_Trackserver.constants.LOG_LEVEL)
+        _console_handler.setFormatter(CoT_Trackserver.constants.LOG_FORMAT)
         _logger.addHandler(_console_handler)
         _logger.propagate = False
-    logging.getLogger("asyncio").setLevel(CoT_Tracker.constants.LOG_LEVEL)
+    logging.getLogger("asyncio").setLevel(CoT_Trackserver.constants.LOG_LEVEL)
 
     def __init__(self, event_queue: asyncio.Queue) -> None:
         self.event_queue: asyncio.Queue = event_queue
@@ -38,9 +38,9 @@ class TrackerReceiverWorker(Worker):
                  cot_stale: int = None, poll_interval: int = None):
         super().__init__(event_queue)
         self.cot_stale: int = int(cot_stale or
-                                  CoT_Tracker.constants.DEFAULT_INTERVAL)
+                                  CoT_Trackserver.constants.DEFAULT_INTERVAL)
         self.poll_interval: int = int(poll_interval or
-                                      CoT_Tracker.constants.DEFAULT_INTERVAL)
+                                      CoT_Trackserver.constants.DEFAULT_INTERVAL)
         self.accountID = ""
         self.sessionID = ""
 
@@ -51,7 +51,7 @@ class TrackerReceiverWorker(Worker):
             return None
         n = 1
         for device in devices:
-            event = CoT_Tracker.functions.json_to_cot(device, self.cot_stale)
+            event = CoT_Trackserver.functions.json_to_cot(device, self.cot_stale)
             await self.event_queue.put(event)
             self._logger.info("Added "+str(n)+" of "+str(len(devices))+" devices to que")
             n = n+1
@@ -63,7 +63,7 @@ class TrackerReceiverWorker(Worker):
                 'http://mobile.trackserver.co.uk/api/api/MobileApp/GetDeviceData?SessionID=' + self.sessionID + '&AccountID=' + str(
                     self.accountID) + '&PullAll=true')
         except urllib.error.HTTPError:
-            self.sessionID, self.accountID = CoT_Tracker.functions.login()
+            self.sessionID, self.accountID = CoT_Trackserver.functions.login()
             r = urllib.request.urlopen(
                 'http://mobile.trackserver.co.uk/api/api/MobileApp/GetDeviceData?SessionID=' + self.sessionID + '&AccountID=' + str(
                     self.accountID) + '&PullAll=true')
@@ -78,7 +78,7 @@ class TrackerReceiverWorker(Worker):
         self._logger.info("Running TrackerReceiverWorker")
         while 1:
             self._logger.info("Logging in")
-            self.sessionID, self.accountID = CoT_Tracker.functions.login()
+            self.sessionID, self.accountID = CoT_Trackserver.functions.login()
             self._logger.info("Retreived sessinID=" + str(self.sessionID) + " and accountID=" + str(self.accountID))
             await self._get_devices()
             await asyncio.sleep(self.poll_interval)
@@ -105,16 +105,16 @@ class EventTransmitter(Worker):  # pylint: disable=too-few-public-methods
             if not tx_event:
                 continue
 
-            if isinstance(tx_event, CoT_Tracker.Event):
+            if isinstance(tx_event, CoT_Trackserver.Event):
                 _event = tx_event.generate_cot()
             else:
                 _event = tx_event
-            self._logger.info("Sending event to server "+CoT_Tracker.DEFAULT_COT_IP+":"+str(CoT_Tracker.DEFAULT_COT_PORT))
+            self._logger.info("Sending event to server " + CoT_Trackserver.DEFAULT_COT_IP + ":" + str(CoT_Trackserver.DEFAULT_COT_PORT))
             self.writer.write(_event)
             self._logger.info("Event send to server")
             await self.writer.drain()
 
-            await asyncio.sleep(CoT_Tracker.DEFAULT_SLEEP * random.random())
+            await asyncio.sleep(CoT_Trackserver.DEFAULT_SLEEP * random.random())
 
 
 class EventReceiver(Worker):  # pylint: disable=too-few-public-methods

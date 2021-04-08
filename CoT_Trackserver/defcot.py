@@ -35,6 +35,8 @@ class Event:
         def lat(self, value):
             if 90 >= value >= -90:
                 self._lat = Decimal(value)
+            elif value == 9999999.0:
+                self._lat = Decimal(value)
             else:
                 raise Exception(
                     "Latitude based on WGS-84 ellipsoid in signed degree-decimal format (e.g. -33.350000). Range -90 -> +90.")
@@ -46,6 +48,8 @@ class Event:
         @lon.setter
         def lon(self, value):
             if 180 >= value >= -180:
+                self._lon = Decimal(value)
+            elif value == 9999999.0:
                 self._lon = Decimal(value)
             else:
                 raise Exception(
@@ -358,7 +362,7 @@ class Event:
                     sts_attr["readiness"] = str(self.readiness)
                 except AttributeError:
                     pass
-                cot = ET.Element('Status', attrib=sts_attr)
+                cot = ET.Element('status', attrib=sts_attr)
                 return cot
 
         class Contact:
